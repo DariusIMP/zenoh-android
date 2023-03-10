@@ -21,5 +21,4 @@
 
     <style name="Theme.Zenoh.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="Theme.Zenoh.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

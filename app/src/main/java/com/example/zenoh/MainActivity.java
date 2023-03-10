@@ -6,9 +6,11 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 
+import com.example.zenoh.ui.main.ZenohViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
+import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ZenohdService zenohdService;
     boolean mBound = false;
+
+    private ZenohViewModel viewModel;
 
     private Intent serviceIntent;
 
@@ -64,11 +68,14 @@ public class MainActivity extends AppCompatActivity {
         tabs.setupWithViewPager(viewPager);
         FloatingActionButton fab = binding.fab;
 
+        viewModel = new ViewModelProvider(this).get(ZenohViewModel.class);
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (!zenohdService.isRunning()) {
                     startZenohdService();
+                    viewModel.setZenohdLogs(zenohdService.getZenohdLogs());
                 } else {
                     zenohdService.stopForeground(true);
                 }

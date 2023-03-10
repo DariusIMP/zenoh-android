@@ -6,9 +6,14 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
-public class PageViewModel extends ViewModel {
+public class ZenohViewModel extends ViewModel {
 
     private MutableLiveData<Integer> mIndex = new MutableLiveData<>();
+
+    private MutableLiveData<String> zenohdLogs = new MutableLiveData<>();
+
+
+
     private LiveData<String> mText = Transformations.map(mIndex, new Function<Integer, String>() {
         @Override
         public String apply(Integer input) {
@@ -22,5 +27,13 @@ public class PageViewModel extends ViewModel {
 
     public LiveData<String> getText() {
         return mText;
+    }
+
+    public MutableLiveData<String> getZenohdLogs() {
+        return zenohdLogs;
+    }
+
+    public void setZenohdLogs(MutableLiveData<String> zenohdLogs) {
+        this.zenohdLogs = zenohdLogs;
     }
 }

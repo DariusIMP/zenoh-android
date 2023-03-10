@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.zenoh.R;
 import com.example.zenoh.databinding.FragmentMainBinding;
 
 /**
@@ -22,7 +21,7 @@ public class PlaceholderFragment extends Fragment {
 
     private static final String ARG_SECTION_NUMBER = "section_number";
 
-    private PageViewModel pageViewModel;
+    private ZenohViewModel viewModel;
     private FragmentMainBinding binding;
 
     public static PlaceholderFragment newInstance(int index) {
@@ -36,12 +35,12 @@ public class PlaceholderFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
+        viewModel = new ViewModelProvider(this).get(ZenohViewModel.class);
         int index = 1;
         if (getArguments() != null) {
             index = getArguments().getInt(ARG_SECTION_NUMBER);
         }
-        pageViewModel.setIndex(index);
+        viewModel.setIndex(index);
     }
 
     @Override
@@ -53,7 +52,7 @@ public class PlaceholderFragment extends Fragment {
         View root = binding.getRoot();
 
         final TextView textView = binding.sectionLabel;
-        pageViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        viewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);

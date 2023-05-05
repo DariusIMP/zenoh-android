@@ -33,11 +33,8 @@ public class ZenohdService extends Service {
     private Handler handler;
     private boolean isServiceRunning = false;
     private Runnable runnable;
-
     private Process zenohdProcess;
-
     private MutableLiveData<String> zenohdLogs = new MutableLiveData<>();
-
     public MutableLiveData<String> getZenohdLogs() {
         return zenohdLogs;
     }

@@ -6,6 +6,8 @@ android {
     namespace 'com.example.zenoh'
     compileSdk 33
 
+    ndkVersion rootProject.ext.ndkVersion
+
     defaultConfig {
         applicationId "com.example.zenoh"
         minSdk 26
@@ -28,6 +30,25 @@ android {
     }
     buildFeatures {
         viewBinding true
+    }
+
+    tasks.whenTaskAdded { task ->
+        if ((task.name == 'javaPreCompileDebug' || task.name == 'javaPreCompileRelease')) {
+            task.dependsOn 'cargoBuild'
+        }
+    }
+}
+
+apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
+
+cargo {
+    pythonCommand = "python3"
+    module  = "../rust/zenoh/zenohd"
+    libname = "zenohd"
+    targets = ["arm64"]
+//    targetDirectory = "../../app/lib/arm64-v8a"
+    features {
+        noDefaultBut()
     }
 }
 

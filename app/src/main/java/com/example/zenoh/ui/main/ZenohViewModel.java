@@ -12,8 +12,6 @@ public class ZenohViewModel extends ViewModel {
 
     private MutableLiveData<String> zenohdLogs = new MutableLiveData<>();
 
-
-
     private LiveData<String> mText = Transformations.map(mIndex, new Function<Integer, String>() {
         @Override
         public String apply(Integer input) {
@@ -31,9 +29,5 @@ public class ZenohViewModel extends ViewModel {
 
     public MutableLiveData<String> getZenohdLogs() {
         return zenohdLogs;
-    }
-
-    public void setZenohdLogs(MutableLiveData<String> zenohdLogs) {
-        this.zenohdLogs = zenohdLogs;
     }
 }

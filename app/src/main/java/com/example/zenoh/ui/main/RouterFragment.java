@@ -1,6 +1,7 @@
 package com.example.zenoh.ui.main;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +36,10 @@ public class RouterFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ViewModelProvider(getActivity()).get(ZenohViewModel.class);
-        viewModel.getZenohdLogs().observe(getActivity(), s -> logsTextView.setText(s));
+        viewModel = new ViewModelProvider(requireActivity()).get(ZenohViewModel.class);
+        viewModel.getZenohdLogs().observe(requireActivity(), s -> {
+            logsTextView.setText(s);
+            Log.d("XXX", "Updating text");
+        });
     }
 }

@@ -15,12 +15,17 @@ import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 
 import com.example.zenoh.ui.main.SectionsPagerAdapter;
 import com.example.zenoh.databinding.ActivityMainBinding;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 public class MainActivity extends AppCompatActivity {
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     private ZenohdService zenohdService;
     boolean mBound = false;
@@ -35,10 +40,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
             ZenohdService.ZenohdBinder binder = (ZenohdService.ZenohdBinder) service;
             zenohdService = binder.getService();
             mBound = true;
+            zenohdService.setZenohdLogs(viewModel.getZenohdLogs());
         }
 
         @Override
@@ -58,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        viewModel = new ViewModelProvider(this).get(ZenohViewModel.class);
         com.example.zenoh.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -68,19 +74,36 @@ public class MainActivity extends AppCompatActivity {
         tabs.setupWithViewPager(viewPager);
         FloatingActionButton fab = binding.fab;
 
-        viewModel = new ViewModelProvider(this).get(ZenohViewModel.class);
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!zenohdService.isRunning()) {
-                    startZenohdService();
-                    viewModel.setZenohdLogs(zenohdService.getZenohdLogs());
-                } else {
-                    zenohdService.stopForeground(true);
-                }
+        fab.setOnClickListener(view -> {
+//                new Thread(MainActivity.this::executeZenohd).start();
+            if (!zenohdService.isRunning()) {
+                startZenohdService();
+            } else {
+                zenohdService.stopForeground(true);
             }
         });
+    }
+
+    private void executeZenohd() {
+        try {
+            Log.d(TAG, "Starting zenohd service.");
+            Process zenohdProcess = Runtime.getRuntime().exec(getApplicationInfo().nativeLibraryDir + "/zenohd");
+            BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(zenohdProcess.getErrorStream())
+            );
+            String line = "";
+            StringBuilder builder = new StringBuilder();
+            Log.d(TAG, "AAA");
+            while (zenohdProcess.isAlive() && (line = bufferedReader.readLine()) != null) {
+                builder.append(line);
+                String log = builder.toString();
+                Log.d(TAG, log);
+//                zenohdLogs.postValue(log);
+            }
+            Log.d(TAG, "Zenohd execution stopped.");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void stopZenohdService() {

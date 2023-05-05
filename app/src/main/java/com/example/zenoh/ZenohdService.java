@@ -11,9 +11,11 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import java.io.BufferedReader;
@@ -34,10 +36,8 @@ public class ZenohdService extends Service {
     private boolean isServiceRunning = false;
     private Runnable runnable;
     private Process zenohdProcess;
-    private MutableLiveData<String> zenohdLogs = new MutableLiveData<>();
-    public MutableLiveData<String> getZenohdLogs() {
-        return zenohdLogs;
-    }
+    private MutableLiveData<String> zenohdLogs;
+
 
     public class ZenohdBinder extends Binder {
         ZenohdService getService() {
@@ -47,19 +47,27 @@ public class ZenohdService extends Service {
 
     private void executeZenohd() {
         try {
-            zenohdProcess = Runtime.getRuntime().exec(COMMAND);
+            Log.d(TAG, "Starting zenohd service.");
+            zenohdProcess = Runtime.getRuntime().exec(getApplicationInfo().nativeLibraryDir + "/zenohd");
             BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(zenohdProcess.getInputStream())
+                new InputStreamReader(zenohdProcess.getErrorStream())
             );
             String line = "";
             StringBuilder builder = new StringBuilder();
-            while ((line = bufferedReader.readLine()) != null) {
+            while (zenohdProcess.isAlive() && (line = bufferedReader.readLine()) != null) {
                 builder.append(line);
-                zenohdLogs.postValue(builder.toString());
+                String log = builder.toString();
+                Log.d(TAG, log);
+                zenohdLogs.postValue(log);
             }
-        } catch (IOException e) {
+            Log.d(TAG, "Zenohd execution stopped.");
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void setZenohdLogs(MutableLiveData<String> zenohdLogs) {
+        this.zenohdLogs = zenohdLogs;
     }
 
     @Override
@@ -91,8 +99,6 @@ public class ZenohdService extends Service {
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
         NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "zenohd", importance);
         channel.setDescription("zenohd channel");
-        // Register the channel with the system; you can't change the importance
-        // or other notification behaviors after this
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
     }
@@ -119,7 +125,6 @@ public class ZenohdService extends Service {
         handler.removeCallbacks(runnable);
         handler.getLooper().quit();
         handlerThread.interrupt();
-        handlerThread.stop();
         handlerThread.quit();
         Toast.makeText(this, "Zenohd service done", Toast.LENGTH_SHORT).show();
     }
